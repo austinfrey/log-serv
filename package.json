@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "choo": "^6.7.0",
+    "ecstatic": "^3.1.1",
+    "hyperlog": "^4.12.1",
+    "level": "^2.1.1",
+    "level-js": "^2.2.4",
+    "routes": "^2.1.0",
+    "sheetify": "^7.1.0",
+    "tachyons": "^4.9.1",
+    "through2": "^2.0.3",
+    "to2": "^1.0.0",
+    "websocket-stream": "^5.1.1"
+  }
+}
