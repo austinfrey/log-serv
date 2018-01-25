@@ -12,19 +12,22 @@ module.exports = state
 
 function state(state, emitter) {
   state.count = 0
-  state.heads = []
+  state.latest = 'No Posts Found'
 
   emitter.on('DOMContentLoaded', function() {
     emitter.on('increment', (count) => {
       state.count += count
       emitter.emit('render')
     })
-  })
-  emitter.on('new:head', () => {
-    log.heads((err, heads) => {
-      state.heads = heads
-      emitter.emit('render')
+
+    emitter.on('add:post', post => {
+//      state.latest = post
+//      emitter.emit('render')
+      log.append({ post }, (err, node) => {
+          state.latest = 'blah blah blah'
+          emitter.emit('render')
+        }
+      )
     })
   })
-  stream.on('data', data => emitter.emit('new:head'))
 }
