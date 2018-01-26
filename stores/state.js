@@ -40,21 +40,21 @@ function state(state, emitter) {
     }
 
     function getPrev(prev) {
-      log.get(prev, (err, node) => {
-        if(err) return console.error(err)
-        state.latest = node
-        emitter.emit('render')
-      })
+      getNode(prev)
     }
 
     function getNext(current) {
       db.get(current, (err, val) => {
         if(err) return console.error(err)
-        log.get(val, (err, node) => {
-          if(err) return console.error(err)
-          state.latest = node
-          emitter.emit('render')
-        })
+        getNode(val)
+      })
+    }
+
+    function getNode(key) {
+      log.get(key, (err, node) => {
+        if(err) return console.error(err)
+        state.latest = node
+        emitter.emit('render')
       })
     }
   })

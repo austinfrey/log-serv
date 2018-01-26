@@ -51,9 +51,11 @@ function views(state, emit) {
       return html`
         <div>
           <p><strong>Subject</strong> ${state.latest.value.message.title}</p>
-          <p><strong>Message</strong> ${state.latest.value.message.post}</p>
+          <p><strong>Message</strong></p>
+          <p>${state.latest.value.message.post}</p>
           <p>${state.latest.value.message.timestamp}</p>
-          <p id="key"><strong>Key</strong> ${state.latest.key}</p>
+          <p><strong>Key</strong></p>
+          <p id="key">${state.latest.key}</p>
           <input type="hidden" id="link" value=${state.latest.links[0]}>
           <div class="ma2">
             <button class="mr2 pv2 ph4" onclick=${getPrev}>Prev</button>
