@@ -7,6 +7,8 @@ const views = require('./views/views.js')
 const app = choo()
 
 css('tachyons')
+css('./public/style.css')
+
 app.use(states)
 app.route('/', mainView)
 app.mount('body')
