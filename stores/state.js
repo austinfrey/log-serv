@@ -31,31 +31,23 @@ function state(state, emitter) {
         if(err) return console.error(err)
         try {
           const date = new Date().toISOString()
-          await db.put(`!branch!${node.links[0]}!${date}`, node.key)
+          await db.batch([
+            {
+                type: 'put'
+              , key: `!branch!${node.links[0]}!${date}`
+              , value: node.key
+            }
+            , {
+                type: 'put'
+              , key: node.links[0]
+              , value: node.key
+            }
+          ])
         } catch(err) {
-          console.error(err)
+          alert(err)
         }
         state.latest = []
         assembleLatest(node.links[0])
-      })
-    }
-
-    function getPrev(prev) {
-      getNode(prev)
-    }
-
-    function getNext(current) {
-      db.get(current, (err, val) => {
-        if(err) return console.error(err)
-        getNode(val)
-      })
-    }
-
-    function getNode(key) {
-      log.get(key, (err, node) => {
-        if(err) return console.error(err)
-        state.latest = []
-        assembleLatest(key)
       })
     }
 
@@ -72,6 +64,27 @@ function state(state, emitter) {
       log.get(chunk, (err, node) => {
         err ? console.err(err) : state.latest.push(node)
         next()
+      })
+    }
+
+    function getPrev(prev) {
+      state.latest = []
+      getNode(prev)
+    }
+
+    function getNext(current) {
+      db.get(current, (err, val) => {
+        if(err) return console.error(err)
+        state.latest = []
+        getNode(val)
+      })
+    }
+
+    function getNode(key) {
+      log.get(key, (err, node) => {
+        if(err) return console.error(err)
+        state.latest.push(node)
+        emitter.emit('render')
       })
     }
   })
