@@ -5,14 +5,13 @@ const to = require('to2')
 
 const db = level('./browser.db')
 const log = hyperlog(db, {valueEncoding: 'json'})
-const stream = wsock('ws://zi.gy:5000')
+const stream = wsock('ws://localhost:5000')
 
 stream.pipe(log.replicate({live: true})).pipe(stream)
 
 module.exports = state
 
 function state(state, emitter) {
-  state.count = ['hey', 'ho', 'lets', 'go']
   state.latest = 'No post yet'
 
   emitter.on('DOMContentLoaded', function() {
@@ -41,22 +40,6 @@ function state(state, emitter) {
       })
     }
 
-    function assembleLatest(link) {
-      const logKeys = db.createValueStream({
-          gt: `!branch!${link}!`
-        , lt: `!branch!${link}!~`
-      })
-      logKeys.pipe(to(pushNode))
-      logKeys.on('end', () => emitter.emit('render'))
-    }
-
-    function pushNode(chunk, enc, next) {
-      log.get(chunk, (err, node) => {
-        err ? console.err(err) : state.latest.push(node)
-        next()
-      })
-    }
-
     function getPrev(prev) {
       getNode(prev)
     }
@@ -71,8 +54,24 @@ function state(state, emitter) {
     function getNode(key) {
       log.get(key, (err, node) => {
         if(err) return console.error(err)
-        state.latest = node
-        emitter.emit('render')
+        state.latest = []
+        assembleLatest(key)
+      })
+    }
+
+    function assembleLatest(link) {
+      const logKeys = db.createValueStream({
+          gt: `!branch!${link}!`
+        , lt: `!branch!${link}!~`
+      })
+      logKeys.pipe(to(pushNode))
+      logKeys.on('end', () => emitter.emit('render'))
+    }
+
+    function pushNode(chunk, enc, next) {
+      log.get(chunk, (err, node) => {
+        err ? console.err(err) : state.latest.push(node)
+        next()
       })
     }
   })

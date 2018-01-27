@@ -3,16 +3,11 @@ const html = require('choo/html')
 module.exports = views
 
 function views(state, emit) {
-  const nums = state.count.map(item => html`<li>${item}</li>`)
-
   return html`
     <div class="cf bg-near-white">
       <div class="pa2 fl w-100 w-50-ns">
         <h1 class="ma2">Recent Posts</h1>
         ${showLatest()}
-        <ul>
-          ${nums}
-        </ul>
       </div>
       <div class="pa2 fl w-100 w-50-ns">
         <h1 class="ma2">Post</h1>
