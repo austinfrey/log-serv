@@ -5,7 +5,7 @@ const to = require('to2')
 
 const db = level('./browser.db')
 const log = hyperlog(db, {valueEncoding: 'json'})
-const stream = wsock('ws://localhost:5000')
+const stream = wsock('ws://zi.gy:5000')
 
 stream.pipe(log.replicate({live: true})).pipe(stream)
 
@@ -37,7 +37,7 @@ function state(state, emitter) {
           console.error(err)
         }
         state.latest = []
-        assembleLatest
+        assembleLatest(node.links[0])
       })
     }
 

@@ -53,7 +53,7 @@ function views(state, emit) {
         </div>
       `
     } else {
-      state.latest.map(node => {
+      return state.latest.map(node => {
         return html`
           <div>
             <p><strong>Subject</strong> ${node.value.message.title}</p>
@@ -62,7 +62,7 @@ function views(state, emit) {
             <p><strong>Timestamp</strong></p>
             <p>${node.value.message.timestamp}</p>
             <p><strong>Key</strong></p>
-            <p id="key">${node.latest.key}</p>
+            <p id="key">${node.key}</p>
             <input type="hidden" id="link" value=${node.links[0]}>
             <div class="ma2">
               <button class="mr2 pv2 ph4" onclick=${getPrev}>Prev</button>
