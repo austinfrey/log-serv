@@ -1,6 +1,7 @@
 const level = require('level-browserify')
 const hyperlog = require('hyperlog')
 const wsock = require('websocket-stream')
+const to = require('to2')
 
 const db = level('./browser.db')
 const log = hyperlog(db, {valueEncoding: 'json'})
@@ -11,7 +12,7 @@ stream.pipe(log.replicate({live: true})).pipe(stream)
 module.exports = state
 
 function state(state, emitter) {
-  state.count = 0
+  state.count = ['hey', 'ho', 'lets', 'go']
   state.latest = 'No post yet'
 
   emitter.on('DOMContentLoaded', function() {
@@ -30,12 +31,29 @@ function state(state, emitter) {
       log.append({ message }, async(err, node) => {
         if(err) return console.error(err)
         try {
-          await db.put(node.links[0], node.key)
+          const date = new Date().toISOString()
+          await db.put(`!branch!${node.links[0]}!${date}`, node.key)
         } catch(err) {
           console.error(err)
         }
-        state.latest = node
-        emitter.emit('render')
+        state.latest = []
+        assembleLatest
+      })
+    }
+
+    function assembleLatest(link) {
+      const logKeys = db.createValueStream({
+          gt: `!branch!${link}!`
+        , lt: `!branch!${link}!~`
+      })
+      logKeys.pipe(to(pushNode))
+      logKeys.on('end', () => emitter.emit('render'))
+    }
+
+    function pushNode(chunk, enc, next) {
+      log.get(chunk, (err, node) => {
+        err ? console.err(err) : state.latest.push(node)
+        next()
       })
     }
 

@@ -12,6 +12,10 @@ body {
   font-family: helvetica, arial, sans-serif;
 }
 
+p {
+  overflow-wrap: break-word;
+}
+
 h1 {
   font-weight: bold;
   color: pink;
@@ -34,6 +38,13 @@ button:active {
   box-shadow: none;
 }
 
+.opposite {
+  background-color: yellow;
+}
 
+
+.opposite:hover {
+  background-color: teal;
+}
 
 
