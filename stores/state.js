@@ -5,7 +5,7 @@ const to = require('to2')
 
 const db = level('./browser.db')
 const log = hyperlog(db, {valueEncoding: 'json'})
-const stream = wsock('ws://localhost:5000')
+const stream = wsock('ws://zi.gy:5000')
 
 stream.pipe(log.replicate({live: true})).pipe(stream)
 
@@ -13,6 +13,7 @@ module.exports = state
 
 function state(state, emitter) {
   state.latest = 'No post yet'
+  state.branches = []
 
   emitter.on('DOMContentLoaded', function() {
 
@@ -28,16 +29,11 @@ function state(state, emitter) {
       }
 
       log.append({ message }, async(err, node) => {
-        if(err) return console.error(err)
+        if(err) return alert(err)
         try {
           const date = new Date().toISOString()
           await db.batch([
             {
-                type: 'put'
-              , key: `!branch!${node.links[0]}!${date}`
-              , value: node.key
-            }
-            , {
                 type: 'put'
               , key: node.links[0]
               , value: node.key
@@ -47,11 +43,14 @@ function state(state, emitter) {
           alert(err)
         }
         state.latest = []
-        assembleLatest(node.links[0])
+        state.latest.push(node)
+        emitter.emit('render')
       })
     }
 
-    function assembleLatest(link) {
+
+
+    function assembleBranches(link) {
       const logKeys = db.createValueStream({
           gt: `!branch!${link}!`
         , lt: `!branch!${link}!~`
@@ -62,7 +61,7 @@ function state(state, emitter) {
 
     function pushNode(chunk, enc, next) {
       log.get(chunk, (err, node) => {
-        err ? console.err(err) : state.latest.push(node)
+        err ? alert(err) : state.branches.push(node)
         next()
       })
     }
@@ -74,7 +73,7 @@ function state(state, emitter) {
 
     function getNext(current) {
       db.get(current, (err, val) => {
-        if(err) return console.error(err)
+        if(err) return alert(err)
         state.latest = []
         getNode(val)
       })
@@ -82,7 +81,7 @@ function state(state, emitter) {
 
     function getNode(key) {
       log.get(key, (err, node) => {
-        if(err) return console.error(err)
+        if(err) return alert(err)
         state.latest.push(node)
         emitter.emit('render')
       })
