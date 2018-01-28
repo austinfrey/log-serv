@@ -14,29 +14,33 @@ module.exports = state
 function state(state, emitter) {
   state.posts = []
 
-  emitter.on('add:post', addPost)
+  emitter.on('DOMContentLoaded', function() {
+    emitter.on('add:post', addPost)
 
-  function addPost(post) {
-    (post.type === 'post')
-      ? appendPost(post)
-      : addReply(post)
-  }
+    function addPost(post) {
+      (post.type === 'post')
+        ? appendPost(post)
+        : addReply(post)
+    }
 
-  function appendPost(post) {
-    log.append(post, (err, node) => {
-      if(state.posts.length >= 30) state.posts.pop()
-      state.posts.unshift(node)
-      emitter.emit('render')
-    })
-  }
+    function appendPost(post) {
+      log.append(post, (err, node) => {
+        if(err) return alert(err)
+        if(state.posts.length >= 30) state.posts.pop()
+        state.posts.unshift(node)
+        emitter.emit('render')
+      })
+    }
 
-  function addReply(post) {
-    log.add(post.link, post, (err, node) => {
-      if(state.posts.length >= 30) state.posts.pop()
-      state.posts.unshift(node)
-      emitter.emit('render')
-    })
-  }
+    function addReply(post) {
+      log.add(post.link, post, (err, node) => {
+        if(err) return alert(err)
+        if(state.posts.length >= 30) state.posts.pop()
+        state.posts.unshift(node)
+        emitter.emit('render')
+      })
+    }
+  })
 }
 
 log.on('add', indexPost)
@@ -52,16 +56,25 @@ function indexPost(node) {
       }
       , {
           type: 'put'
-        , key: node.value.topic + '!' + new Date().toISOString()
+        , key: '!' + node.value.topic + '!' + new Date().toISOString()
+        , value: node.key
+      }
+      , {
+          type: put
+        , key: '!posts!' + new Data().toISOString()
         , value: node.key
       }
     ])
-  }
-  else {
+  } else {
     db.batch([
       {
           type: 'put'
         , key: node.value.topic + '!' + new Date().toISOString()
+        , value: node.key
+      }
+      , {
+          type: put
+        , key: '!posts!' + new Data().toISOString()
         , value: node.key
       }
     ])

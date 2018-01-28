@@ -10,7 +10,7 @@ function mainView(state, emit) {
       <div class="pa2 fl w-100 w-40-ns bg-washed-blue">
         ${post(state, emit)}
       </div>
-      <div class="pa2 fl w-100 w-60-ns bg-washed-red tc">
+      <div class="pa2 fl w-100 w-60-ns bg-washed-red">
         ${display(state, emit)}
       </div>
     </div>

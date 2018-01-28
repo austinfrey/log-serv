@@ -9,7 +9,10 @@ function display (state, emit) {
       <div id="posts">
         ${state.posts.map(post => {
           return html`
-            <p>${JSON.stringify(post)}</p>
+            <div class="pv4 ph3">
+              <p>${post.value.content}</p>
+              <p>${post.value.topic}</p>
+            </div>
           `
         })}
       </div>
