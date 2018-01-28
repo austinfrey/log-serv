@@ -5,7 +5,7 @@ const to = require('to2')
 
 const db = level('./browser.db')
 const log = hyperlog(db, {valueEncoding: 'json'})
-const stream = wsock('ws://localhost:5000')
+const stream = wsock('ws://' + location.host)
 
 stream.pipe(log.replicate({live: true})).pipe(stream)
 
