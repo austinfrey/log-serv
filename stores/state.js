@@ -12,88 +12,59 @@ stream.pipe(log.replicate({live: true})).pipe(stream)
 module.exports = state
 
 function state(state, emitter) {
-  state.msgTitle = ''
-  state.replyLink = null
-  state.latest = 'No post yet'
-  state.branches = []
+  state.posts = []
 
-  emitter.on('DOMContentLoaded', function() {
+  emitter.on('add:post', addPost)
 
-    emitter.on('add:post', addPost)
-    emitter.on('add:reply', addReply)
-    emitter.on('get:prev', getPrev)
-    emitter.on('get:next', getNext)
+  function addPost(post) {
+    (post.type === 'post')
+      ? appendPost(post)
+      : addReply(post)
+  }
 
-    function addPost(msg) {
-      const message = {
-          post: msg.post
-        , title: msg.title
-        , timestamp: new Date().toISOString()
-      }
-
-      log.add(state.replyLink,{ message }, async(err, node) => {
-        if(err) return alert(err)
-
-        state.replyLink = null
-        try {
-          const date = new Date().toISOString()
-          await db.batch([
-            {
-                type: 'put'
-              , key: node.links[0]
-              , value: node.key
-            }
-          ])
-        } catch(err) {
-          alert(err)
-        }
-        state.latest = []
-        state.latest.push(node)
-        emitter.emit('render')
-      })
-    }
-
-    function addReply(msg) {
-      const state.replyLink = msg.link
-      state.msgTitle = `RE: ${msg.title}`
+  function appendPost(post) {
+    log.append(post, (err, node) => {
+      if(state.posts.length >= 30) state.posts.pop()
+      state.post.unshift(node)
       emitter.emit('render')
-    }
+    })
+  }
 
-    function assembleBranches(link) {
-      const logKeys = db.createValueStream({
-          gt: `!branch!${link}!`
-        , lt: `!branch!${link}!~`
-      })
-      logKeys.pipe(to(pushNode))
-      logKeys.on('end', () => emitter.emit('render'))
-    }
-
-    function pushNode(chunk, enc, next) {
-      log.get(chunk, (err, node) => {
-        err ? alert(err) : state.branches.push(node)
-        next()
-      })
-    }
-
-    function getPrev(prev) {
-      state.latest = []
-      getNode(prev)
-    }
-
-    function getNext(current) {
-      db.get(current, (err, val) => {
-        if(err) return alert(err)
-        state.latest = []
-        getNode(val)
-      })
-    }
-
-    function getNode(key) {
-      log.get(key, (err, node) => {
-        if(err) return alert(err)
-        state.latest.push(node)
-        emitter.emit('render')
-      })
-    }
-  })
+  function addReply(post) {
+    log.add(post.link, post, (err, node) => {
+      if(state.posts.length >= 30) state.posts.pop()
+      state.post.unshift(node)
+      emitter.emit('render')
+    })
+  }
 }
+
+log.on('add', indexPost)
+
+function indexPost(node) {
+  const prefix = '!replies!'
+  if (node.value.link) {
+    db.batch([
+      {
+          type: 'put'
+        , key: prefix + link + new Date().toISOString()
+        , value: node.key
+      }
+      , {
+          type: 'put'
+        , key: node.value.topic + '!' + new Date().toISOString()
+        , value: node.key
+      }
+    ])
+  }
+  else {
+    db.batch([
+      {
+          type: 'put'
+        , key: node.value.topic + '!' + new Date().toISOString()
+        , value: node.key
+      }
+    ])
+  }
+}
+

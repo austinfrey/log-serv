@@ -2,7 +2,7 @@ const choo = require('choo');
 const html = require('choo/html');
 const css = require('sheetify')
 const states = require('./stores/state.js')
-const views = require('./views/views.js')
+const view = require('./views/main.js')
 
 const app = choo()
 
@@ -16,7 +16,7 @@ app.mount('body')
 function mainView(state, emit) {
   return html`
     <body>
-      ${views(state, emit)}
+      ${view(state, emit)}
     </body>
   `
 }
