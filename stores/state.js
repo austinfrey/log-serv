@@ -25,7 +25,7 @@ function state(state, emitter) {
   function appendPost(post) {
     log.append(post, (err, node) => {
       if(state.posts.length >= 30) state.posts.pop()
-      state.post.unshift(node)
+      state.posts.unshift(node)
       emitter.emit('render')
     })
   }
@@ -33,7 +33,7 @@ function state(state, emitter) {
   function addReply(post) {
     log.add(post.link, post, (err, node) => {
       if(state.posts.length >= 30) state.posts.pop()
-      state.post.unshift(node)
+      state.posts.unshift(node)
       emitter.emit('render')
     })
   }

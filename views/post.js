@@ -21,6 +21,7 @@ function post (state, emit) {
     emit('add:post', {
         topic
       , content
-    })
+      , type: 'post'
+    }) //TODO add ability to send link back for replies
   }
 }
