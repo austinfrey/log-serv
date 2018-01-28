@@ -19,7 +19,7 @@ function views(state, emit) {
   function reply() {
     return html`
       <div>
-        <input class="mh2 mb2" id="msg_title"placeholder="Subject">
+        <input class="mh2 mb2" id="msg_title"placeholder="Subject" value=${state.msgTitle}>
         <textarea class="mh2 w-two-thirds h4" id="msg_input" "placeholder="Message..."></textarea><br>
         <button class="pv2 ph4 ma2" onclick=${onClick}>Submit</button>
       </div>
@@ -51,7 +51,7 @@ function views(state, emit) {
       return state.latest.map(node => {
         return html`
           <div>
-            <p><strong>Subject</strong> ${node.value.message.title}</p>
+            <p><strong>Subject</strong> <span id="title">${node.value.message.title}</span></p>
             <p><strong>Message</strong></p>
             <p>${node.value.message.post}</p>
             <p><strong>Timestamp</strong></p>
@@ -76,14 +76,15 @@ function views(state, emit) {
   }
 
   function getNext() {
-    //pulling from HTML rather than state so when...
-    //more than one element present, state isn't needed
     const next = document.getElementById('key').innerHTML
     emit('get:next', next)
   }
 
   function replyTo() {
-    //TODO
+    const title = document.getElementById('title').innerHTML
+    const link = document.getElementById('key').innerHTML
+    const msg = { title, link }
+    emit('add:reply', msg)
   }
 }
 

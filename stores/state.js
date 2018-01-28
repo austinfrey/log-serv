@@ -5,19 +5,22 @@ const to = require('to2')
 
 const db = level('./browser.db')
 const log = hyperlog(db, {valueEncoding: 'json'})
-const stream = wsock('ws://zi.gy:5000')
+const stream = wsock('ws://localhost:5000')
 
 stream.pipe(log.replicate({live: true})).pipe(stream)
 
 module.exports = state
 
 function state(state, emitter) {
+  state.msgTitle = ''
+  state.replyLink = null
   state.latest = 'No post yet'
   state.branches = []
 
   emitter.on('DOMContentLoaded', function() {
 
     emitter.on('add:post', addPost)
+    emitter.on('add:reply', addReply)
     emitter.on('get:prev', getPrev)
     emitter.on('get:next', getNext)
 
@@ -28,8 +31,10 @@ function state(state, emitter) {
         , timestamp: new Date().toISOString()
       }
 
-      log.append({ message }, async(err, node) => {
+      log.add(state.replyLink,{ message }, async(err, node) => {
         if(err) return alert(err)
+
+        state.replyLink = null
         try {
           const date = new Date().toISOString()
           await db.batch([
@@ -48,7 +53,11 @@ function state(state, emitter) {
       })
     }
 
-
+    function addReply(msg) {
+      const state.replyLink = msg.link
+      state.msgTitle = `RE: ${msg.title}`
+      emitter.emit('render')
+    }
 
     function assembleBranches(link) {
       const logKeys = db.createValueStream({
